@@ -25,12 +25,12 @@ public:
 	//void				ReAllocateBuffer();
 	const char			*GetStringText() const;
 	bool				IfNeededMemoryIsAllocated(int amountOfMemory);
-	//const char	*c_str() const;
+	//const char		*c_str() const;
 	
 protected:
 	size_t				length;
 	char				*strData;
-	int					allocatedMemory;
+int						allocatedMemory;
 	char				initialBufferAllocated[ALLOC_BASE_BUFFER];
 };
 
