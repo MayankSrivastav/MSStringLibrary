@@ -1,10 +1,11 @@
 #ifndef MSSTRING_H
 #define MSSTRING_H
+
 #include <string.h>
 #include <assert.h>
 
 // Base length of string is 16 bytes
-const int ALLOC_BASE_BUFFER = 20;
+const int ALLOC_BASE_BUFFER = 0x10;
 
 class MSString {
 public:
@@ -25,12 +26,13 @@ public:
 	//void				ReAllocateBuffer();
 	const char			*GetStringText() const;
 	bool				IfNeededMemoryIsAllocated(int amountOfMemory);
-	//const char		*c_str() const;
+	void				ReAllocateNeededMemory(int amountOfMemory);
+	//const char	*c_str() const;
 	
 protected:
 	size_t				length;
 	char				*strData;
-int						allocatedMemory;
+	int					allocatedMemory;
 	char				initialBufferAllocated[ALLOC_BASE_BUFFER];
 };
 
@@ -60,15 +62,21 @@ MSString::MSString(const char *strText) {
 	InitializeBuffer();
 	len = strlen(strText);
 
-	assert(sizeof(strData) == ALLOC_BASE_BUFFER);
+	assert(sizeof(strData) <= ALLOC_BASE_BUFFER);
 
 	// If textString is not null and If the 
 	// needed memory is allocated then 
 	// copy the string text to strData
 	// i.e. the string
-	if (strText && IfNeededMemoryIsAllocated(len + 1)) {
-		strcpy_s(strData, sizeof(strData), strText);
-		length = len;
+	if (strText) {
+		if (IfNeededMemoryIsAllocated(len + 1)) {
+			strcpy_s(strData, sizeof(initialBufferAllocated), strText);
+			length = len;
+		} else {			
+			ReAllocateNeededMemory(len + 1);
+			strcpy_s(strData, len + 1, strText);
+			length = len;
+		}
 	}
 }
 
@@ -80,11 +88,19 @@ void MSString::InitializeBuffer() {
 }
 
 bool MSString::IfNeededMemoryIsAllocated(int amountOfMemory) {
-	return true;
+	return (allocatedMemory >= amountOfMemory);
 }
 
 size_t MSString::Length() const {
 	return length;
+}
+
+void MSString::ReAllocateNeededMemory(int amountOfMemory) {
+	char *buffer = new char[amountOfMemory];
+	//delete [] strData;
+	allocatedMemory = amountOfMemory;
+
+	strData = buffer;
 }
 
 const char *MSString::GetStringText() const {
