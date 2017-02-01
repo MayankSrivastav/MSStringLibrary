@@ -3,31 +3,30 @@
 
 #include <string.h>
 #include <assert.h>
-
+using namespace std;
 // Base length of string is 16 bytes
 const int ALLOC_BASE_BUFFER = 0x10;
 
 class MSString {
 public:
 						MSString();
-						MSString(const MSString& strText);
+						MSString(const MSString& strText);	// TODO: Not implemented correctly
 						MSString(const char *strText);
 
-						~MSString();
+						~MSString();	// TODO: Complete implement in the end
 
 	inline size_t		Length() const;	
-	/*char				operator[](int index) const;
-	int					Compare(const char *strText) const;
-	void				Empty();
+	//char				operator[](int index) const;
+	//int				Compare(const char *strText) const;
+	//void				Empty();
 	bool				IsEmpty() const;
-	void				ToLower();
-	void				ToUpper();*/
-	void				InitializeBuffer();
-	//void				ReAllocateBuffer();
+	//void				ToLower();
+	//void				ToUpper();
+	void				InitializeBuffer();	
 	const char			*GetStringText() const;
-	bool				IfNeededMemoryIsAllocated(int amountOfMemory);
 	void				ReAllocateNeededMemory(int amountOfMemory);
-	//const char	*c_str() const;
+	bool				IfNeededMemoryIsAllocated(int amountOfMemory);
+	friend				ostream& operator<<(ostream& os, const MSString& strData);
 	
 protected:
 	size_t				length;
@@ -72,12 +71,19 @@ MSString::MSString(const char *strText) {
 		if (IfNeededMemoryIsAllocated(len + 1)) {
 			strcpy_s(strData, sizeof(initialBufferAllocated), strText);
 			length = len;
-		} else {			
+		} else {
 			ReAllocateNeededMemory(len + 1);
 			strcpy_s(strData, len + 1, strText);
 			length = len;
 		}
 	}
+}
+
+// Checks and returns if the string
+// is empty or not
+inline bool MSString::IsEmpty() const
+{	
+	return strData[0] == NULL;
 }
 
 void MSString::InitializeBuffer() {
@@ -107,6 +113,15 @@ const char *MSString::GetStringText() const {
 	return strData;
 }
 
-MSString::~MSString() { }
+ostream& operator<<(ostream& os, const MSString& strData) {
+	os << strData.GetStringText();
+	return os;
+}
+
+MSString::~MSString() { 
+	if (strData != initialBufferAllocated) {
+		delete [] strData;
+	}
+}
 
 #endif
