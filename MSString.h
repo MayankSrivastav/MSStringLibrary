@@ -3,7 +3,9 @@
 
 #include <string.h>
 #include <assert.h>
+//#include <exception>
 using namespace std;
+
 // Base length of string is 16 bytes
 const int ALLOC_BASE_BUFFER = 0x10;
 
@@ -16,12 +18,13 @@ public:
 						~MSString();	// TODO: Complete implement in the end
 
 	inline size_t		Length() const;	
-	//char				operator[](int index) const;
-	//int				Compare(const char *strText) const;
-	//void				Empty();
+	const char&			operator[](int index) const;
+	//int				Compare() const;
+	bool				Equals(const char* strText) const;
+	inline void			Empty();
 	bool				IsEmpty() const;
-	//void				ToLower();
-	//void				ToUpper();
+	void				ToLower();
+	void				ToUpper();
 	void				InitializeBuffer();	
 	const char			*GetStringText() const;
 	void				ReAllocateNeededMemory(int amountOfMemory);
@@ -83,7 +86,15 @@ MSString::MSString(const char *strText) {
 // is empty or not
 inline bool MSString::IsEmpty() const
 {	
-	return strData[0] == NULL;
+	return (strData[0] == NULL);
+}
+
+// Makes the string empty
+inline void MSString::Empty() {
+	if (strData) {
+		strData[0] = '\0';
+		length = 0;
+	}
 }
 
 void MSString::InitializeBuffer() {
@@ -101,11 +112,46 @@ size_t MSString::Length() const {
 	return length;
 }
 
+void MSString::ToLower() {
+	if (strData) {
+		for (auto i = 0; i < strlen(strData); ++i) {
+			if (strData[i] >= 'A' && strData[i] <= 'Z') {
+				strData[i] = strData[i] + 32;
+			}
+		}
+	}	
+}
+
+void MSString::ToUpper() {
+	if (strData) {
+		for (auto i = 0; i < strlen(strData); ++i) {
+			if (strData[i] >= 'a' && strData[i] <= 'z') {
+				strData[i] = strData[i] - 32;
+			}
+		}
+	}	
+}
+
+bool MSString::Equals(const char* strText) const {
+	if (strlen(strData) != strlen(strText)) return false;
+
+	for (auto i = 0, j = 0; strData[i] && strText[j]; ++i, ++j) {
+		if (strData[i] != strText[j]) return false;
+	}
+	return true;	
+}
+
+const char& MSString::operator[](int index) const {
+	if (index < 0 || index >= strlen(strData)) {
+		throw out_of_range("Index out of range");
+	}
+	return strData[index];
+}
+
 void MSString::ReAllocateNeededMemory(int amountOfMemory) {
 	char *buffer = new char[amountOfMemory];
 	//delete [] strData;
 	allocatedMemory = amountOfMemory;
-
 	strData = buffer;
 }
 
