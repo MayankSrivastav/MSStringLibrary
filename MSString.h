@@ -17,14 +17,18 @@ public:
 
 						~MSString();	// TODO: Complete implement in the end
 
-	inline size_t		Length() const;	
-	const char&			operator[](int index) const;
+	size_t		Length() const;		
+	const char*	c_str() const;
 	//int				Compare() const;
 	bool				Equals(const char* strText) const;
 	inline void			Empty();
 	bool				IsEmpty() const;
 	void				ToLower();
 	void				ToUpper();
+	const char&			operator[](int index) const;
+	bool				operator==(const MSString& strText) const;
+	bool				operator==(const char *strText) const;
+	MSString			operator+=(const char *strText);
 	void				InitializeBuffer();	
 	const char			*GetStringText() const;
 	void				ReAllocateNeededMemory(int amountOfMemory);
@@ -53,7 +57,11 @@ MSString::MSString(const MSString& strText) {
 	// copy the string text to strData
 	// i.e. the string
 	if (IfNeededMemoryIsAllocated(len + 1)) {
-		strcpy_s(strData, sizeof(strData), strText.strData);
+		strcpy_s(strData, sizeof(initialBufferAllocated), strText.strData);
+		length = len;
+	} else {
+		ReAllocateNeededMemory(len + 1);
+		strcpy_s(strData, len + 1, strText.strData);
 		length = len;
 	}
 }
@@ -108,7 +116,7 @@ bool MSString::IfNeededMemoryIsAllocated(int amountOfMemory) {
 	return (allocatedMemory >= amountOfMemory);
 }
 
-size_t MSString::Length() const {
+inline size_t MSString::Length() const {
 	return length;
 }
 
@@ -148,6 +156,29 @@ const char& MSString::operator[](int index) const {
 	return strData[index];
 }
 
+bool MSString::operator==(const MSString& strText) const {
+	if (strlen(strData) != strlen(strText.strData)) return false;
+
+	for (char *i = strData, *j = strText.strData; *i && *j; ++i, ++j) {
+		if (*i != *j) return false;
+	}
+	return true;
+}
+
+// Check if MSString is equal to char *string
+// if this overload is not defined, it will 
+// default calling the MSString argument overload
+// for operator==
+bool MSString::operator==(const char *strText) const {
+	return this->Equals(strText);
+}
+
+//MSString MSString::operator+=(const char *strText) {
+//	if (strText) {
+//		return strData += ;
+//	}
+//}
+
 void MSString::ReAllocateNeededMemory(int amountOfMemory) {
 	char *buffer = new char[amountOfMemory];
 	//delete [] strData;
@@ -156,6 +187,10 @@ void MSString::ReAllocateNeededMemory(int amountOfMemory) {
 }
 
 const char *MSString::GetStringText() const {
+	return strData;
+}
+
+inline const char *MSString::c_str() const {
 	return strData;
 }
 
