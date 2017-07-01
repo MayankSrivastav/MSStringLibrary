@@ -1,3 +1,5 @@
+// A C++ string library
+
 #ifndef MSSTRING_H
 #define MSSTRING_H
 
